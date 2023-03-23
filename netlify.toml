@@ -1,14 +1,13 @@
 [build]
-  command = "pip install -r requirements.txt && npm i && cp app.py src_functions/ && npx netlify-lambda build src_functions"
+  command = "pip install -r requirements.txt && npm i && cp app.py src_functions/ && npx netlify-lambda build src_functions -d functions_build"
   publish = "dist"
-  functions = "src_functions"
+  functions = "functions_build"
 
 [build.environment]
   PYTHON_VERSION = "3.8"
   FLASK_ENV = "development"
 
 [functions]
-  directory = "src_functions"
+  directory = "functions_build"
   node_bundler = "esbuild"
-
 

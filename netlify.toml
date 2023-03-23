@@ -13,4 +13,5 @@
   status = 200
 
 [functions]
-  "*".node_bundler = "esbuild"
+  directory = "functions_build"
+  node_bundler = "esbuild"

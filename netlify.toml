@@ -1,0 +1,18 @@
+[build]
+  command = "pip install -r requirements.txt"
+  publish = "dist"
+  environment = { PYTHON_VERSION = "3.9" }
+
+[build.environment]
+  PYTHON_VERSION = "3.9"
+
+[[plugins]]
+  package = "@netlify/plugin-functions"
+
+[functions]
+directory = "netlify_functions"
+node_bundler = "esbuild"
+command = "pip install -r requirements.txt && npm i && cp ov_crawl/* netlify_functions/ && npx netlify-lambda build netlify_functions"
+
+[context.production.environment]
+FLASK_ENV = "production"

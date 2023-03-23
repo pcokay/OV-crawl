@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graph Visualization</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+    <h1>Graph Visualization</h1>
+
+   <div>
+    <label for="semantic_scholar_title">Semantic Scholar Title:</label>
+    <input type="text" id="semantic_scholar_title" name="semantic_scholar_title">
+  <label for="wiki_title">Wikipedia Title:</label>
+  <input type="text" id="wiki_title" name="wiki_title">
+  <label for="base_currency">Base Currency:</label>
+  <input type="text" id="base_currency" name="base_currency" value="ETH">
+  <button id="add_node_button">Add Node</button>
+</div>
+
+    <div id="mynetwork" style="width: 100%; height: 500px;"></div>
+    <button id="resetBtn">Reset</button>
+    
+
+
+    <script>
+
+function addNodesFromLinks(tokenHash) {
+    $.ajax({
+        type: "POST",
+        url: "/add_nodes_from_links",
+        contentType: "application/json",
+        data: JSON.stringify({ token_hash: tokenHash }),
+        success: function (response) {
+            console.log("Nodes and edges added from links");
+
+            var existingNodeIds = network.body.data.nodes.getIds();
+            response.nodes.forEach(function (node) {
+                var existingNode = existingNodeIds.find(function (nodeId) {
+                    return network.body.data.nodes.get(nodeId).wiki_url === node.wiki_url;
+                });
+
+                if (existingNode) {
+                    // If the node already exists, add an edge between the existing node and the current node (if not already connected)
+                    if (!network.body.data.edges.get().some(edge => (edge.from === tokenHash && edge.to === existingNode) || (edge.from === existingNode && edge.to === tokenHash))) {
+                        network.body.data.edges.add({
+                            from: tokenHash,
+                            to: existingNode
+                        });
+                    }
+                } else {
+                    // If the node doesn't exist, add it to the network
+                    network.body.data.nodes.add({
+                        id: node.token_hash,
+                        label: node.wiki_title,
+                        title: node.wiki_title,
+                        wiki_url: node.wiki_url
+                    });
+
+                    // Add an edge between the new node and the current node
+                    network.body.data.edges.add({
+                        from: tokenHash,
+                        to: node.token_hash
+                    });
+                }
+            });
+
+            fetchData();
+        },
+        error: function (error) {
+            console.log("Error adding nodes and edges from links", error);
+        },
+    });
+}
+
+
+        
+function fetchData() {
+    $.when(
+        // Fetch nodes
+        $.get('/query'),
+        // Fetch edges
+        $.get('/valuelink')
+    ).done(function (nodesResponse, edgesResponse) {
+        console.log('Nodes:', nodesResponse[0].nodes);
+        console.log('Edges:', edgesResponse[0].valuelinks);
+
+        // Merge nodes with the same title
+        let uniqueNodes = [];
+        nodesResponse[0].nodes.forEach(node => {
+            let existingNode = uniqueNodes.find(n => n.wiki_title === node.wiki_title);
+            if (existingNode) {
+                // Update edges to point to the existing node
+                edgesResponse[0].valuelinks.forEach(edge => {
+                    if (edge.node_1.token_hash === node.token_hash) {
+                        edge.node_1.token_hash = existingNode.token_hash;
+                    }
+                    if (edge.node_2.token_hash === node.token_hash) {
+                        edge.node_2.token_hash = existingNode.token_hash;
+                    }
+                });
+            } else {
+                uniqueNodes.push(node);
+            }
+        });
+
+        var nodes = new vis.DataSet(uniqueNodes.map(function (node) {
+            return {
+                id: node.token_hash,
+                label: node.wiki_title,
+                title: node.wiki_title,
+                wiki_url: node.wiki_url
+            };
+        }));
+
+        var edges = new vis.DataSet(edgesResponse[0].valuelinks.map(function (edge) {
+            return {
+                id: edge.id,
+                from: edge.node_1.token_hash,
+                to: edge.node_2.token_hash
+            };
+        }));
+
+        var container = document.getElementById("mynetwork");
+        var data = {
+            nodes: nodes,
+            edges: edges,
+        };
+        var options = {};
+        network = new vis.Network(container, data, options);
+        network.on("click", function (params) {
+            if (params.nodes.length > 0) {
+                var nodeId = params.nodes[0];
+                var node = nodes.get(nodeId);
+                if (node.wiki_url) {
+                    window.open(node.wiki_url, "_blank");
+                }
+                addNodesFromLinks(nodeId);
+            }
+        });
+    });
+}
+
+
+
+$("#add_node_button").click(function () {
+    var semantic_scholar_title = $("#semantic_scholar_title").val();
+    var wiki_title = $("#wiki_title").val();
+    var base_currency = $("#base_currency").val();
+
+    if (!wiki_title && !semantic_scholar_title) {
+        alert("Please fill in at least one of Wikipedia Title or Semantic Scholar Title fields.");
+        return;
+    }
+
+    $.ajax({
+        type: "POST",
+        url: "/add_node",
+        contentType: "application/json",
+        data: JSON.stringify({
+            wiki_title: wiki_title,
+            semantic_scholar_title: semantic_scholar_title,
+            base_currency: base_currency
+        }),
+        success: function (response) {
+            console.log("Node added:", response);
+            fetchData();
+        },
+        error: function (error) {
+            console.log("Error adding node:", error);
+        },
+    });
+});
+
+
+// Fetch data on page load
+fetchData();
+        $("#resetBtn").click(function () {
+            location.reload();
+});
+
+    </script>
+</body>
+</html>

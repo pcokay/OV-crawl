@@ -2,6 +2,9 @@
   command = "pip install -r requirements.txt && npm i && npx webpack --config webpack.functions.js"
   publish = "dist"
 
+[build.environment]
+  PYTHON_VERSION = "3.8"
+
 [functions]
   directory = "functions_build"
   node_bundler = "esbuild"

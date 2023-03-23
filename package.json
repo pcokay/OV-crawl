@@ -13,9 +13,9 @@
   "author": "po/ov",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/pcokay/OV-crawl/issues"
+    "url": "https://github.com/pcokay/OV_crawl/issues"
   },
-  "homepage": "https://github.com/pcokay/OV-crawl#readme",
+  "homepage": "https://github.com/pcokay/OV_crawl#readme",
   "dependencies": {
     "netlify-lambda": "^2.0.16"
   }

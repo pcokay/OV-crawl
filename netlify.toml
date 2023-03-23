@@ -12,5 +12,6 @@
   name = "app"
   runtime = "python3.8"
 
-[functions.*]
+[functions]
   node_bundler = "esbuild"
+

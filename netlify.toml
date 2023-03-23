@@ -1,5 +1,5 @@
 [build]
-  command = "pip install -r requirements.txt && npm i && npx webpack --config webpack.functions.js"
+  command = "pip install -r requirements.txt && npm i && mkdir -p dist && npx webpack --config webpack.functions.js"
   publish = "dist"
 
 [build.environment]

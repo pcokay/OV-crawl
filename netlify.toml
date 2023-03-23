@@ -1,5 +1,5 @@
 [build]
-  command = "pip install -r requirements.txt && npm i && cp app.py src_functions/ && npx netlify-lambda build src_functions -d functions_build"
+  command = "pip install -r requirements.txt && npm i && cp app.py src_functions/ && npx netlify-lambda build src_functions --config webpack.functions.js"
   publish = "dist"
   functions = "functions_build"
 
@@ -7,7 +7,10 @@
   PYTHON_VERSION = "3.8"
   FLASK_ENV = "development"
 
-[functions]
-  directory = "functions_build"
-  node_bundler = "esbuild"
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
 
+[functions]
+  "*".node_bundler = "esbuild"

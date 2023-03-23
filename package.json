@@ -1,0 +1,26 @@
+{
+  "name": "ov_crawl",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pcokay/OV_crawl.git"
+  },
+  "author": "po/ov",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pcokay/OV_crawl/issues"
+  },
+  "homepage": "https://github.com/pcokay/OV_crawl#readme",
+  "dependencies": {
+    "netlify-lambda": "^2.0.16"
+  },
+  "devDependencies": {
+    "webpack": "^5.76.3",
+    "webpack-cli": "^5.0.1"
+  }
+}
